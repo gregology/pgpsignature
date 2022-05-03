@@ -1,0 +1,31 @@
+version: '3'
+services:
+
+  pgpsignature-db:
+    image: "postgres:14.2"
+    container_name: pgpsignature-db
+    volumes:
+      - pgpsignature-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=pgpsignature
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+
+  pgpsignature-app:
+    image: "gregology/pgpsignature"
+    container_name: pgpsignature-app
+    environment:
+      - APP_SETTINGS=config.ProductionConfig
+      - DATABASE_URL=postgresql://user:password@pgpsignature-db:5432/pgpsignature
+    ports:
+      - 5000:5000
+    links:
+      - pgpsignature-db
+
+volumes:
+  pgpsignature-data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/user/pgpsignature/data
