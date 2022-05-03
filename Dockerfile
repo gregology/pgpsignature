@@ -1,23 +1,16 @@
-FROM python:3.9.0-alpine
+FROM python:3.10-slim-buster
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev
+ENV APP_SETTINGS config.ProductionConfig
 
-RUN pip install --upgrade pip
-COPY ./requirements.txt /usr/src/app/requirements.txt
-RUN export LDFLAGS="-L/usr/local/opt/openssl/lib"
-RUN export FLASK_APP="app"
-RUN export FLASK_ENV="production"
-RUN pip install -r requirements.txt
+RUN apt-get update
+RUN apt-get install -y postgresql
+RUN apt-get install -y libpq-dev gcc
 
-# Add a script to be executed every time the container starts.
-COPY entrypoint.sh /usr/bin/
-RUN chmod +x /usr/bin/entrypoint.sh
-ENTRYPOINT ["entrypoint.sh"]
-EXPOSE 5000
+COPY requirements.txt requirements.txt
+RUN pip3 install -r requirements.txt
 
-# Start the main process.
-CMD ["flask", "run"]
+COPY . .
+
+CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
