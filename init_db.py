@@ -1,11 +1,14 @@
-import sqlite3
+import os
+import psycopg2
 
-connection = sqlite3.connect('database.db')
+conn = psycopg2.connect(os.environ['DATABASE_URL'])
 
+cur = conn.cursor()
 
 with open('schema.sql') as f:
-    connection.executescript(f.read())
+    cur.execute(f.read())
 
+conn.commit()
 
-connection.commit()
-connection.close()
+cur.close()
+conn.close()
